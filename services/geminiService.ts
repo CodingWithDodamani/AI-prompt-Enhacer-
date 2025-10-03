@@ -13,6 +13,34 @@ export const isApiKeyConfigured = (): boolean => {
   return !!API_KEY;
 };
 
+/**
+ * Parses errors from the Gemini API and returns a more user-friendly Error object.
+ * @param error The original error caught from the API call.
+ * @param context A string describing the operation that failed (e.g., "prompt enhancement").
+ * @returns A new Error object with a user-friendly message.
+ */
+const parseGeminiError = (error: any, context: string): Error => {
+    console.error(`Error calling Gemini API for ${context}:`, error);
+    if (error instanceof Error) {
+        const errorMessage = error.message.toLowerCase();
+        
+        if (errorMessage.includes('api key not valid')) {
+             return new Error("Invalid API Key. Please check your API_KEY environment variable. It may be incorrect, expired, or lack the necessary permissions.");
+        }
+        if (errorMessage.includes('safety') || errorMessage.includes('blocked')) {
+            return new Error("Content Policy Violation. Your input could not be processed due to the AI's safety policies. Please rephrase your core idea and try again.");
+        }
+        if (errorMessage.includes('rate limit') || errorMessage.includes('resource has been exhausted')) {
+             return new Error("Rate Limit Exceeded. You've made too many requests in a short period. Please wait a moment before trying again.");
+        }
+        // For other known but not specifically handled errors
+        return new Error(`Failed during ${context}: ${error.message}`);
+    }
+    // Fallback for unknown error types
+    return new Error(`An unknown error occurred during ${context}.`);
+};
+
+
 export const generateEnhancedPrompt = async (
   userInput: string,
   taskType: AiTaskType,
@@ -95,15 +123,7 @@ Original user idea: "${userInput}"`;
     });
     return response.text.trim();
   } catch (error) {
-    console.error("Error calling Gemini API for prompt enhancement:", error);
-    if (error instanceof Error) {
-        const geminiError = error as any; 
-        if (geminiError.message && geminiError.message.includes('API key not valid')) {
-             throw new Error("Invalid API Key. Please check your API_KEY environment variable.");
-        }
-         throw new Error(`Failed to generate prompt: ${error.message}`);
-    }
-    throw new Error("Failed to generate prompt due to an unknown error.");
+    throw parseGeminiError(error, "prompt enhancement");
   }
 };
 
@@ -149,14 +169,6 @@ If the idea is too vague or no specific task type strongly matches, respond with
     return null; // Or "NONE" if preferred for unmappable suggestions
 
   } catch (error) {
-    console.error("Error calling Gemini API for task suggestion:", error);
-    if (error instanceof Error) {
-      const geminiError = error as any;
-      if (geminiError.message && geminiError.message.includes('API key not valid')) {
-        throw new Error("Invalid API Key for task suggestion. Please check your API_KEY environment variable.");
-      }
-      throw new Error(`Failed to suggest task type: ${error.message}`);
-    }
-    throw new Error("Failed to suggest task type due to an unknown error.");
+    throw parseGeminiError(error, "task suggestion");
   }
 };

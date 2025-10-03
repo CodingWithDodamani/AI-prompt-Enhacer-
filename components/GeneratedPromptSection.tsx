@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import LoadingSpinner from './LoadingSpinner';
 
@@ -37,7 +36,47 @@ const GeneratedPromptSection: React.FC<GeneratedPromptSectionProps> = ({ promptT
   const copyButtonCopiedClasses = "bg-green-500 hover:bg-green-600 text-white focus:ring-green-400";
 
   const renderErrorContent = () => {
-    const isApiKeyError = error && error.toLowerCase().includes('api key');
+    const errorMessage = error ? error.toLowerCase() : "";
+    const isApiKeyError = errorMessage.includes('api key');
+    const isContentPolicyError = errorMessage.includes('content policy');
+    const isRateLimitError = errorMessage.includes('rate limit');
+
+    let title = "Error Generating Prompt";
+    let troubleshootingContent: React.ReactNode;
+
+    if (isApiKeyError) {
+      title = "API Key Error";
+      troubleshootingContent = (
+        <p className="mt-1">
+          Please ensure your `API_KEY` is correct, active, and has the necessary permissions. Visit the <strong>Support</strong> page for more information on API key configuration.
+        </p>
+      );
+    } else if (isContentPolicyError) {
+      title = "Content Policy Violation";
+      troubleshootingContent = (
+        <ul className="list-disc list-inside mt-1 space-y-1">
+          <li>Your input may contain sensitive words or ideas that conflict with the AI's safety guidelines.</li>
+          <li>Try rephrasing your core idea to be more neutral or specific.</li>
+          <li>Avoid topics that are explicitly disallowed by the AI service provider.</li>
+        </ul>
+      );
+    } else if (isRateLimitError) {
+      title = "Too Many Requests";
+      troubleshootingContent = (
+         <p className="mt-1">
+          You've exceeded the request limit for your API key. Please wait for a few moments before trying again.
+        </p>
+      );
+    } else {
+      // Generic error
+      troubleshootingContent = (
+        <ul className="list-disc list-inside mt-1 space-y-1">
+          <li>Check your internet connection.</li>
+          <li>The AI service might be temporarily unavailable. Try again in a few moments.</li>
+          <li>If the problem persists, visit our <strong>Support</strong> page for more detailed FAQs.</li>
+        </ul>
+      );
+    }
 
     return (
       <div className="p-5 bg-[var(--error-bg)] border border-[var(--error-border)] rounded-xl text-[var(--error-text-body)] flex items-start shadow-lg transition-colors duration-300" role="alert">
@@ -46,23 +85,12 @@ const GeneratedPromptSection: React.FC<GeneratedPromptSectionProps> = ({ promptT
         </svg>
         <div>
           <p className="font-heading font-semibold text-lg text-[var(--error-text-heading)] transition-colors duration-300">
-            {isApiKeyError ? "API Key Error" : "Error Generating Prompt"}
+            {title}
           </p>
           <p className="mt-1 text-sm">{error}</p>
           <div className="mt-3 text-sm border-t border-[var(--error-border)] pt-3">
             <h4 className="font-semibold text-[var(--error-text-heading)]">Troubleshooting Steps:</h4>
-            {isApiKeyError ? (
-              <p className="mt-1">
-                Please ensure your `API_KEY` is correct, active, and has the necessary permissions. Visit the <strong>Support</strong> page for more information on API key configuration.
-              </p>
-            ) : (
-              <ul className="list-disc list-inside mt-1 space-y-1">
-                <li>Check your internet connection.</li>
-                <li>Try submitting your request again in a few moments.</li>
-                <li>Try rephrasing your core idea, as it may have been blocked by the AI's safety filters.</li>
-                <li>Visit our <strong>Support</strong> page for more detailed FAQs.</li>
-              </ul>
-            )}
+            {troubleshootingContent}
           </div>
         </div>
       </div>

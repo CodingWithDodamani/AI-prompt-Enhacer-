@@ -1,4 +1,3 @@
-
 # AI Prompt Enhancer Pro
 
 **Transform your simple ideas into powerful, detailed instructions for any AI model.**
@@ -43,24 +42,43 @@ The process is designed to be simple and intuitive:
 
 ---
 
-## ⚙️ Setup & Configuration
+## ⚙️ Setup & Deployment
 
-This application is designed to run in an environment where the Google Gemini API key is securely managed.
+This application's core functionality depends on a Google Gemini API key. This key must be securely provided to the application through an environment variable.
 
-### Prerequisites
+### API Key Requirement
 
--   A modern web browser (Chrome, Firefox, Safari, Edge).
--   A valid Google Gemini API key.
+You must have a valid Google Gemini API key. You can get one for free from [Google AI Studio](https://aistudio.google.com/app/apikey).
 
-### API Key Configuration
+The application code expects the key to be available as an environment variable named `API_KEY`. **The application will not function without it.**
 
-The application requires the Google Gemini API key to be set as an environment variable named `API_KEY`.
+### Vercel Deployment (Recommended)
 
-```
-API_KEY="YOUR_GEMINI_API_KEY_HERE"
-```
+Deploying to [Vercel](https://vercel.com) is the easiest way to get this project online. Vercel's build process will automatically make the environment variable you set available to the application.
 
-The application client-side code will access this key via `process.env.API_KEY`. It is crucial that this environment variable is correctly configured in the execution or build environment where the application is deployed. **The application will not function without it.**
+#### New Project Setup
+
+1.  **Push to GitHub**: Make sure your project code is in a GitHub repository.
+2.  **Import Project in Vercel**:
+    -   Log in to your Vercel account.
+    -   From your dashboard, click "Add New..." and select "Project".
+    -   Connect your GitHub account and select the repository for this project.
+3.  **Configure Environment Variable (Crucial Step!)**:
+    -   Before you click "Deploy", expand the **"Environment Variables"** section.
+    -   In the **KEY** field, you must type `API_KEY`.
+    -   In the **VALUE** field, paste your Google Gemini API key (it starts with `AIzaSy...`).
+    -   Click the **"Add"** button to save the variable.
+4.  **Deploy**:
+    -   Click the **"Deploy"** button. Vercel will build and launch your site.
+
+#### Fixing an Existing Project on Vercel
+
+If you've already deployed and are seeing the "API Key Not Found" error, follow these steps:
+
+1.  Go to your project's dashboard on Vercel.
+2.  Click on the **"Settings"** tab, then select **"Environment Variables"** from the side menu.
+3.  Add the `API_KEY` and its value as described above and click **"Save"**.
+4.  **You must redeploy the application for the change to take effect.** Go to the **"Deployments"** tab, find the latest deployment, click the three-dots menu (`...`) on the right, and select **"Redeploy"**.
 
 ---
 
